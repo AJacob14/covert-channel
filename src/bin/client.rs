@@ -1,15 +1,24 @@
 use base64::{engine::general_purpose, Engine};
+use clap::{command, Parser};
 use reqwest::header::{HeaderMap, HeaderValue};
 use std::fs;
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Cli {
+    #[arg()]
+    filepath: String,
+}
+
 #[tokio::main]
 async fn main() {
-    let endpoint = "http://127.0.0.1:3000";
+    let args = Cli::parse();
+    let endpoint = "http://192.168.56.102:3000";
     let start_enpoint = format!("{}/embeddings", endpoint);
     let transmit_endpoint = format!("{}/chat/completions", endpoint);
     let end_endpoint = format!("{}/batches", endpoint);
 
-    let file = "./test_files/top_secret.png";
+    let file = args.filepath;
     let result = fs::read(file);
     if result.is_err(){
         eprint!("Failed to read file\nReason: {}", result.unwrap_err());
